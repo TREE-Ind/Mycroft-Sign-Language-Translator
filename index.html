@@ -7,7 +7,11 @@
     <title>Alexa Sign Language Translator</title>
     <link href="https://fonts.googleapis.com/css?family=Baloo+Bhaina" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="dist/build.js"></script> 
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     
 </head>
 <body>
@@ -22,9 +26,9 @@
         <h2>Hey there!</h2>
       </div>
       <div class="modal-body">
-        <p>This project is an experiment that uses Tensorflow.js and your webcam to make Amazon Echo respond to sign language. It began with a simple question:</p> 
+        <p>This project is a proof of concept that uses Tensorflow.js and your webcam to make the open source AI platform Mycroft respond to sign language. It began with a simple question:</p> 
         <p><b><em>"If voice is the future of computing what about those who cannot hear or speak?"</em></b></p>
-        <p>You can find the code for this demo on <a href="https://github.com/shekit/alexa-sign-language-translator" target="_blank">github</a> or watch a <a href="https://www.youtube.com/watch?v=kS53y6GWm0w" target="_blank">video</a> of it in action.</p>
+        <p>A huge thank you to the original author this app is based on. <a href="https://github.com/shekit/alexa-sign-language-translator" target="_blank">View Original Alexa Version</a>.  Porting the original code to work with Mycroft greatly increases the accessibility of the concept, but this app is still in a very early phase and has much room for improvement.</p>
         <p style="font-size:12px;"><em>Note: This demo runs entirely in your browser without any data sent to any server</em></p>
       </div>
     </div>
@@ -38,22 +42,46 @@
     <div class="centered">
       <h1 id="text" class="intro-steps">Step 1: Enter Words<br><span class="subtext">Add a few words below. In the next step we'll associate each word with signs from the webcam</h1>
       <div id="training-list">
-        <div id="example-list"></div>
-        <div id="add">
-          <form id="add-word" autocomplete="off">
-            <input type="text" id="new-word" placeholder="Add Training word">
-            <br/><br/>
-            <label>
-              <input type="checkbox" id="is-terminal-word">
+		  <div class="nav-buttons">
+		  <button class="btn btn-light" type="button" data-toggle="collapse" data-target="#phrases-card" aria-expanded="false" aria-controls="phrases-card">
+    Phrases
+  </button>
+		  		  <button class="btn btn-light" type="button" data-toggle="collapse" data-target="#config-card" aria-expanded="false" aria-controls="config-card">
+    Settings
+  </button>
+		  </div>
+		  <div class="collapse" id="phrases-card">
+        <ul id="example-list" class="list-group"></ul>
+		  </div>
+        <div id="add" class="card">
+		<div class="collapse" id="config-card">
+		<div class="card-body">
+		  
+          <form class="form-group" id="add-word" autocomplete="off">
+            <input class="form-control" type="text" id="new-word" placeholder="Add Training word">
+            
+			  <div class="form-group form-check">
+              <input class="form-check-input" type="checkbox" id="is-terminal-word">
+				  <label class="form-check-label" for="is-terminal-word">
               Is terminal word?
             </label>
-            <br/><br/>
-            <input type="submit" value="Add Word">
+			  </div>
+            
+            <input class="btn btn-dark" type="submit" value="Add Word">
             <p><b>Terminal Word</b> - A word that appears as the last word in your query</p>
             <p>e.g If you intend to ask "What's <b><em>the weather</em></b>?" & "What's <b><em>the time</em></b>?" then <b><em>the weather</em></b> and <b><em>the time</em></b> are terminal words whereas <b><em>what's</em></b> is not</p>
           </form>
+		  <form class="form-group" id="save-wake-word" autocomplete="off">
+            <input class="form-control" type="text" id="wake-word" placeholder="Enter Your Wake Word Here">
+            <input class="btn btn-dark" type="submit" value="Save Wake Word">
+
+          </form>
+			</div>
         </div>
+		  </div>
+		  <div class="alert alert-success" role="alert">
         <p id="count">Training: 2 words</p>
+		  </div>
         <div id="action-btn"></div>
       </div>
       

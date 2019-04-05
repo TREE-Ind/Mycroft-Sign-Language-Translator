@@ -5,6 +5,8 @@
 import {KNNImageClassifier} from 'deeplearn-knn-image-classifier';
 import * as dl from 'deeplearn';
 
+const socket = new WebSocket('ws://192.168.1.98:8181/core');
+
 
 // Webcam Image size. Must be 227. 
 const IMAGE_SIZE = 227;
@@ -13,13 +15,31 @@ const TOPK = 10;
 
 const predictionThreshold = 0.98
 
-var words = ["alexa", "hello", "other"]
-// var words = ["alexa", "hello", "what is", "the weather", "the time",
+var words = ["Ezra", "hello", "what is", "what time is it", "the weather", "set alarm", "none"]
+// var words = ["Ezra", "hello", "what is", "the weather", "the time",
 //"add","eggs","to the list","five","feet","in meters","tell me","a joke", "bye", "other"]
 
 
 // words from above array which act as terminal words in a sentence
-var endWords = ["hello"]
+var endWords = ["hello", "what time is it", "the weather", "set alarm"]
+
+// Connection opened
+socket.addEventListener('open', function (event) {
+    socket.send('{"type": "speak", "data": {"utterance": "Sign Language App Connection Established", "lang": "en-us"}}');
+});
+
+socket.onmessage = function (event) {
+  //console.log(JSON.stringify(event.data));
+  //let obj = JSON.parse(event.data);
+  //let arrValues = Object.values(obj);
+  var result = JSON.parse(event.data)
+  console.log(result)
+  if (result.type == "speak") {
+	//console.log(result.data.utterance)
+	var utterance = result.data.utterance
+	console.log(utterance)
+  }
+}
 
 class LaunchModal {
   constructor(){
@@ -134,6 +154,9 @@ class Main {
     const predButton = document.createElement('button')
 
     predButton.innerText = "Start Predicting >>>"
+	predButton.classList.add("btn");
+	predButton.classList.add("btn-light");
+	predButton.classList.add("btn-lg");
     div.appendChild(predButton);
 
     predButton.addEventListener('mousedown', () => {
@@ -146,7 +169,7 @@ class Main {
         // if wake word has not been trained
         if(exampleCount[0] == 0){
           alert(
-            `You haven't added examples for the wake word ALEXA`
+            `You haven't added examples for your wake word.`
             )
           return
         }
@@ -184,6 +207,9 @@ class Main {
 
     const trainButton = document.createElement('button')
     trainButton.innerText = "Training >>>"
+	trainButton.classList.add("btn");
+	trainButton.classList.add("btn-light");
+	trainButton.classList.add("btn-lg");
     div.appendChild(trainButton);
 
 
@@ -192,12 +218,12 @@ class Main {
       // check if user has added atleast one terminal word
       if(words.length > 3 && endWords.length == 1){
         console.log('no terminal word added')
-        alert(`You have not added any terminal words.\nCurrently the only query you can make is "Alexa, hello".\n\nA terminal word is a word that will appear in the end of your query.\nIf you intend to ask "What's the weather" & "What's the time" then add "the weather" and "the time" as terminal words. "What's" on the other hand is not a terminal word.`)
+        alert(`You have not added any terminal words.\nCurrently the only query you can make is "Wake Word, hello".\n\nA terminal word is a word that will appear in the end of your query.\nIf you intend to ask "What's the weather" & "What's the time" then add "the weather" and "the time" as terminal words. "What's" on the other hand is not a terminal word.`)
         return
       }
 
       if(words.length == 3 && endWords.length ==1){
-        var proceed = confirm("You have not added any words.\n\nThe only query you can currently make is: 'Alexa, hello'")
+        var proceed = confirm("You have not added any words.\n\nThe only query you can currently make is: 'Wake Word, hello'")
 
         if(!proceed) return
       }
@@ -282,9 +308,10 @@ class Main {
   }
 
   createButton(i, showBtn){
-    const div = document.createElement('div');
+    const div = document.createElement('li');
     this.exampleListDiv.appendChild(div);
-    div.style.marginBottom = '10px';
+    //div.style.marginBottom = '10px';
+	div.classList.add("list-group-item");
     
     // Create Word Text
     const wordText = document.createElement('span')
@@ -303,9 +330,14 @@ class Main {
 
     if(showBtn){
       // Create training button
+	  const btnGroup = document.createElement('div')
+	  btnGroup.classList.add("btn-group");
+	  div.appendChild(btnGroup)
       const button = document.createElement('button')
       button.innerText = "Add Example"//"Train " + words[i].toUpperCase()
-      div.appendChild(button);
+	  button.classList.add("btn");
+	  button.classList.add("btn-dark");
+      btnGroup.appendChild(button);
 
       // Listen for mouse events when clicking the button
       button.addEventListener('mousedown', () => this.training = i);
@@ -314,7 +346,9 @@ class Main {
       // Create clear button to emove training examples
       const btn = document.createElement('button')
       btn.innerText = "Clear"//`Clear ${words[i].toUpperCase()}`
-      div.appendChild(btn);
+	  btn.classList.add("btn");
+	  btn.classList.add("btn-danger");
+      btnGroup.appendChild(btn);
 
       btn.addEventListener('mousedown', () => {
         console.log("clear training data for this label")
@@ -499,20 +533,20 @@ class TextToSpeech{
 
   speak(word){
 
-    if(word == 'alexa'){
+    if(word == 'Ezra'){
       console.log("clear para")
       this.clearPara(true);
 
       setTimeout(() => {
-        // if no query detected after alexa is signed
+        // if no query detected after wake word is signed
         if(this.currentPredictedWords.length == 1){
           this.clearPara(false)
         }
       }, this.waitTimeForQuery)
     } 
 
-    if(word != 'alexa' && this.currentPredictedWords.length == 0){
-      console.log("first word should be alexa")
+    if(word != 'Ezra' && this.currentPredictedWords.length == 0){
+      console.log("first word should be Ezra")
       console.log(word)
       return
     }
@@ -538,16 +572,19 @@ class TextToSpeech{
 
     var utterThis = new SpeechSynthesisUtterance(word)
 
-    utterThis.onend = (evt) => {
-      if(endWords.includes(word)){
-         //if last word is one of end words start listening for transcribing
-        console.log("this was the last word")
+    
+    if(endWords.includes(word)){
+      //if last word is one of end words start listening for transcribing
+      console.log("this was the last word")
 
-        main.setStatusText("Status: Waiting for Response")
+      main.setStatusText("Status: Waiting for Response")
 
-        let stt = new SpeechToText()
-      }
+      let stt = new SpeechToText()
+
+      socket.send('{"type": "recognizer_loop:utterance", "data": {"utterances": ["'+ word +'"], "lang": "en-us"}}');
+        
     }
+    
 
     utterThis.onerror = (evt) => {
       console.log("Error speaking")
@@ -558,7 +595,9 @@ class TextToSpeech{
     utterThis.pitch = this.pitch
     utterThis.rate = this.rate
 
-    this.synth.speak(utterThis)
+    //this.synth.speak(utterThis)
+
+    
 
   }
 
@@ -570,107 +609,123 @@ class SpeechToText{
     this.interimTextLine = document.getElementById("interimText")
     this.textLine = document.getElementById("answerText")
     this.loader = document.getElementById("loader")
-    this.finalTranscript = ''
-    this.recognizing = false
+    //this.finalTranscript = ''
+    //this.recognizing = false
 
-    this.recognition = new webkitSpeechRecognition();
+    //this.recognition = new webkitSpeechRecognition();
 
-    this.recognition.continuous = true;
-    this.recognition.interimResults = true;
+    //this.recognition.continuous = true;
+    //this.recognition.interimResults = true;
 
-    this.recognition.lang = 'en-US'
+    //this.recognition.lang = 'en-US'
 
-    this.cutOffTime = 15000 // cut off speech to text after
+    //this.cutOffTime = 15000 // cut off speech to text after
 
-    this.recognition.onstart = () => {
-      this.recognizing = true;
-      console.log("started recognizing")
-      main.setStatusText("Status: Transcribing")
-    }
+    //this.recognition.onstart = () => {
+      //this.recognizing = true;
+      //console.log("started recognizing")
+      //main.setStatusText("Status: Transcribing")
+    //}
 
-    this.recognition.onerror = (evt) => {
-      console.log(evt + " recogn error")
-    }
+    //this.recognition.onerror = (evt) => {
+      //console.log(evt + " recogn error")
+    //}
 
-    this.recognition.onend = () => {
-      console.log("stopped recognizing")
-      if(this.finalTranscript.length == 0){
-        this.type("No response detected")
+    //this.recognition.onend = () => {
+      //console.log("stopped recognizing")
+      //if(this.finalTranscript.length == 0){
+        //this.type("No response detected")
 
-      }
-      this.recognizing = false;
+      //}
+      //this.recognizing = false;
 
-      main.setStatusText("Status: Finished Transcribing")
+      //main.setStatusText("Status: Finished Transcribing")
       // restart prediction after a pause
-      setTimeout(() => {
-        main.startPredicting()
-      }, 1000)
-    }
+      //setTimeout(() => {
+        //main.startPredicting()
+      //}, 1000)
+    //}
 
-    this.recognition.onresult = (event) => {
-      var interim_transcript = ''
-      if(typeof(event.results) == 'undefined'){
-        return;
-      }
+    //this.recognition.onresult = (event) => {
+      //var interim_transcript = ''
+      //if(typeof(event.results) == 'undefined'){
+        //return;
+      //}
    
 
-      for (var i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          this.finalTranscript += event.results[i][0].transcript;
-        } else {
-          interim_transcript += event.results[i][0].transcript;
-        }
-      }
+      //for (var i = event.resultIndex; i < event.results.length; ++i) {
+        //if (event.results[i].isFinal) {
+          //this.finalTranscript += event.results[i][0].transcript;
+        //} else {
+          //interim_transcript += event.results[i][0].transcript;
+        //}
+      //}
 
 
-      this.interimType(interim_transcript)
-      this.type(this.finalTranscript)
-    }
+      //this.interimType(interim_transcript)
+      //this.type(this.finalTranscript)
+    //}
 
-    setTimeout(()=>{
-      this.startListening();
-    },0)
+    //setTimeout(()=>{
+      //this.startListening();
+    //},0)
     
 
-    setTimeout(()=>{
-      this.stopListening()
-    },this.cutOffTime)
-  }
+    //setTimeout(()=>{
+      //this.stopListening()
+    //},this.cutOffTime)
+  //}
 
-  startListening(){
-    if(this.recognizing){
-      this.recognition.stop()
-      return
-    }
+  //startListening(){
+    //if(this.recognizing){
+      //this.recognition.stop()
+      //return
+    //}
 
-    console.log("listening")
+    //console.log("listening")
 
-    main.pausePredicting()
+    //main.pausePredicting()
 
-    this.recognition.start()
-  }
+    //this.recognition.start()
+  //}
 
-  stopListening(){
-    console.log("STOP LISTENING")
-    if(this.recognizing){
-      console.log("stop speech to text")
-      this.recognition.stop()
+  //stopListening(){
+    //console.log("STOP LISTENING")
+    //if(this.recognizing){
+      //console.log("stop speech to text")
+      //this.recognition.stop()
 
       //restart predicting
-      main.startPredicting()
-      return
-    }
-  }
+      //main.startPredicting()
+      //return
+    //}
+  //}
 
-  interimType(text){
-    this.loader.style.display = "none"
-    this.interimTextLine.innerText = text
-  }
+  //interimType(text){
+    //this.loader.style.display = "none"
+    //this.interimTextLine.innerText = text
+  //}
 
-  type(text){
-    this.loader.style.display = "none"
-    this.textLine.innerText = text;
+  //type(text){
+    //this.loader.style.display = "none"
+    //this.textLine.innerText = text;
+  //}
+  socket.onmessage = function (event) {
+  //console.log(JSON.stringify(event.data));
+  //let obj = JSON.parse(event.data);
+  //let arrValues = Object.values(obj);
+  var response = JSON.parse(event.data)
+  //console.log(result)
+  if (response.type == "speak") {
+	this.textLine = document.getElementById("answerText")
+	this.loader = document.getElementById("loader")
+	//console.log(result.data.utterance)
+	var utterance = response.data.utterance
+	this.textLine.innerText = utterance;
+	this.loader.style.display = "none"									  
   }
+  }
+}
 }
 
 var main = null;
