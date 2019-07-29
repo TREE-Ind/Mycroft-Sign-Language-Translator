@@ -15,8 +15,11 @@ const TOPK = 10;
 
 const predictionThreshold = 0.98
 
-var words = ["Ezra", "hello", "what is", "what time is it", "the weather", "set alarm", "none"]
-// var words = ["Ezra", "hello", "what is", "the weather", "the time",
+
+//Insert a list of words to be trained for sign language recognition
+var words = ["Mycroft", "hello", "what is", "what time is it", "the weather", "set alarm", "none"]
+
+// var words = ["Mycroft", "hello", "what is", "the weather", "the time",
 //"add","eggs","to the list","five","feet","in meters","tell me","a joke", "bye", "other"]
 
 
