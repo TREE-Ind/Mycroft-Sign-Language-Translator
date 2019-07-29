@@ -24,7 +24,7 @@ var TOPK = 10;
 
 var predictionThreshold = 0.98;
 
-var words = ["alexa", "hello", "other"];
+var words = ["Mycroft", "hello", "other"];
 // var words = ["alexa", "hello", "what is", "the weather", "the time",
 //"add","eggs","to the list","five","feet","in meters","tell me","a joke", "bye", "other"]
 
@@ -205,12 +205,12 @@ var Main = function () {
         // check if user has added atleast one terminal word
         if (words.length > 3 && endWords.length == 1) {
           console.log('no terminal word added');
-          alert('You have not added any terminal words.\nCurrently the only query you can make is "Alexa, hello".\n\nA terminal word is a word that will appear in the end of your query.\nIf you intend to ask "What\'s the weather" & "What\'s the time" then add "the weather" and "the time" as terminal words. "What\'s" on the other hand is not a terminal word.');
+          alert('You have not added any terminal words.\nCurrently the only query you can make is "Mycroft, hello".\n\nA terminal word is a word that will appear in the end of your query.\nIf you intend to ask "What\'s the weather" & "What\'s the time" then add "the weather" and "the time" as terminal words. "What\'s" on the other hand is not a terminal word.');
           return;
         }
 
         if (words.length == 3 && endWords.length == 1) {
-          var proceed = confirm("You have not added any words.\n\nThe only query you can currently make is: 'Alexa, hello'");
+          var proceed = confirm("You have not added any words.\n\nThe only query you can currently make is: 'Mycroft, hello'");
 
           if (!proceed) return;
         }
@@ -552,7 +552,7 @@ var TextToSpeech = function () {
       }
 
       if (word != 'alexa' && this.currentPredictedWords.length == 0) {
-        console.log("first word should be alexa");
+        console.log("first word should be Mycroft");
         console.log(word);
         return;
       }
