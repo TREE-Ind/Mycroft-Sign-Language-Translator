@@ -1,11 +1,11 @@
 // Launch in kiosk mode
-// /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --kiosk --app=http://localhost:9966
+// /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --kiosk --app=http://142.93.248.237:9966
 
 
 import {KNNImageClassifier} from 'deeplearn-knn-image-classifier';
 import * as dl from 'deeplearn';
 
-const socket = new WebSocket('ws://0.0.0.1:8181/core');
+const socket = new WebSocket('ws://192.168.1.68:8181/core');
 
 
 // Webcam Image size. Must be 227. 
@@ -273,7 +273,7 @@ class Main {
 
   startWebcam(){
     // Setup webcam
-    navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}, audio: false})
+    navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: "user" } })
     .then((stream) => {
       this.video.srcObject = stream;
       this.video.width = IMAGE_SIZE;
@@ -536,7 +536,7 @@ class TextToSpeech{
 
   speak(word){
 
-    if(word == 'Ezra'){
+    if(word == 'Mycroft'){
       console.log("clear para")
       this.clearPara(true);
 
@@ -548,8 +548,8 @@ class TextToSpeech{
       }, this.waitTimeForQuery)
     } 
 
-    if(word != 'Ezra' && this.currentPredictedWords.length == 0){
-      console.log("first word should be Ezra")
+    if(word != 'Mycroft' && this.currentPredictedWords.length == 0){
+      console.log("first word should be Mycroft")
       console.log(word)
       return
     }
@@ -569,6 +569,10 @@ class TextToSpeech{
 
     this.currentPredictedWords.push(word)
 
+    console.log(word)
+	  
+	console.log(this.currentPredictedWords)
+	
 
     this.textLine.innerText += ' ' + word;
 
@@ -581,10 +585,14 @@ class TextToSpeech{
       console.log("this was the last word")
 
       main.setStatusText("Status: Waiting for Response")
+		
+	  this.currentPredictedWords.toString().replace(/^[, ]+|[, ]+$|[, ]+/g, "");
+	  this.currentPredictedWords.toString().replace(/Mycroft/g, '');
+	  let words = this.currentPredictedWords.join(' ');
 
       let stt = new SpeechToText()
 
-      socket.send('{"type": "recognizer_loop:utterance", "data": {"utterances": ["'+ word +'"], "lang": "en-us"}}');
+      socket.send('{"type": "recognizer_loop:utterance", "data": {"utterances": ["'+ words +'"], "lang": "en-us"}}');
         
     }
     
