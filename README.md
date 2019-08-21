@@ -26,7 +26,7 @@ This will start a web server on [`localhost:9966`](http://localhost:9966).
 
 2. Add some words you want to train on. 
 
-![Alt Text](Mycroft Sign Language Translator App.png)
+![Alt Text](Mycroft_Sign_Language_Translator_App.png)
 
 ## Reference
 To learn more about the classifier used in this repo go to [KNN Image Classifier](https://github.com/PAIR-code/deeplearnjs/tree/master/models/knn_image_classifier)
