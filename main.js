@@ -5,7 +5,7 @@
 import {KNNImageClassifier} from 'deeplearn-knn-image-classifier';
 import * as dl from 'deeplearn';
 
-const socket = new WebSocket('ws://192.168.1.68:8181/core');
+const socket = new WebSocket('ws://0.0.0.1:8181/core');
 
 
 // Webcam Image size. Must be 227. 
